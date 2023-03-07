@@ -15,6 +15,10 @@ fn push(stack: &mut Vec<String>, item: String, maxsize: usize) {
     }
 }
 
+fn size(stack: &Vec<String>) -> usize {
+    stack.len()
+}
+
 fn infix_to_postfix(input: Vec<String>) -> Vec<String> {
     let size_expr = input.len();
     let mut stack: Vec<String> = new_stack(size_expr);
@@ -72,10 +76,6 @@ fn priority(x: &String) -> u8 {
     }
 }
 
-fn size(stack: &Vec<String>) -> usize {
-    stack.len()
-}
-
 fn individual_symbols(input_exp: String) -> Vec<String> {
     let mut tokenized_input: Vec<String> = Vec::new();
     let input_char: Vec<char> = input_exp.chars().collect();
@@ -103,10 +103,50 @@ fn individual_symbols(input_exp: String) -> Vec<String> {
     tokenized_input
 }
 
+
+fn postfix_evalation (postfix: Vec<String>) -> f32 {
+    let size_expr = postfix.len();
+    let mut result_stack = new_stack(size_expr);
+    for i in postfix {
+         match i.as_str() {
+            "+" | "-" | "/" | "*" | "^" => {
+                let oper = i;
+                let op2 = pop(&mut result_stack).unwrap();
+                let op1 = pop(&mut result_stack).unwrap();
+                let result = operation(op1, op2, oper);
+
+                push(&mut result_stack, result.to_string(), size_expr)
+
+            }
+            
+            _ =>  push(&mut result_stack, i.to_string(), size_expr),
+         }
+    }
+    pop(&mut result_stack).unwrap().parse::<f32>().unwrap()
+}
+
+fn operation (op1: String, op2: String, oper: String) -> f32 {
+    let op1 = op1.parse::<f32>().unwrap();
+    let op2 = op2.parse::<f32>().unwrap();
+    let result =match oper.as_str() {
+        "+" => op1 + op2,
+        "-" => op1 - op2,
+        "*" => op1 * op2,
+        "/" => op1 / op2,
+        "^" => op1.powf(op2),
+        _ => 0.0,
+    };
+
+    result
+}
+
 fn main() {
     let input = String::from("(33+45/3*(2+9)-50)");
     println!("The original expression is {:?}", input);
     let input_expression_tokenized = individual_symbols(input);
 
     let postfix = infix_to_postfix(input_expression_tokenized);
+
+
+    println!("The evaluation result is =  {}", postfix_evalation(postfix));
 }
